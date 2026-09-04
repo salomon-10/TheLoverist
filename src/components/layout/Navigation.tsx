@@ -131,7 +131,14 @@ export default function Navigation({
             badge={unreadCount}
           />
         )}
-        {isAuthor && <MobileNavLink href="/create" icon={PenSquare} label="Publier" active={pathname === "/create"} />}
+        {isAuthor && (
+          <MobileNavButton
+            icon={PenSquare}
+            label="Répertoires"
+            active={pathname === "/create" || pathname === "/drafts"}
+            onClick={() => setIsSidebarOpen(true)}
+          />
+        )}
         {viewer?.profile && (
           <MobileNavLink
             href={`/profile/${viewer.profile.username}`}
@@ -175,6 +182,33 @@ function MobileNavLink({
   );
 }
 
+function MobileNavButton({
+  icon: Icon,
+  label,
+  active,
+  onClick
+}: {
+  icon: LucideIcon;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-expanded={active}
+      onClick={onClick}
+      className={cx(
+        "focus-ring relative flex min-w-[64px] flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 font-sans text-[10px] font-medium",
+        active ? "bg-accent-soft text-accent" : "text-muted hover:bg-surface-sunken hover:text-ink"
+      )}
+    >
+      <Icon size={21} strokeWidth={active ? 2.1 : 1.8} />
+      <span>{label}</span>
+    </button>
+  );
+}
+
 function ThemeToggle({ theme, onToggle }: { theme: "light" | "dark"; onToggle: () => void }) {
   const isDark = theme === "dark";
 
@@ -210,7 +244,7 @@ function SidebarLinks({
           <SidebarLink
             href="/create"
             icon={PenSquare}
-            label="Éditeur"
+            label="Répertoires"
             active={pathname === "/create" || pathname === "/drafts"}
             onNavigate={onNavigate}
             trailing={<ChevronDown size={16} />}
