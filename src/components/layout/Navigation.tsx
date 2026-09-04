@@ -124,7 +124,74 @@ export default function Navigation({
           </div>
         </>
       )}
+
+      <nav
+        aria-label="Navigation mobile"
+        className="fixed inset-x-0 bottom-0 z-40 flex min-h-[68px] items-stretch justify-around bg-paper/95 px-1 pb-[env(safe-area-inset-bottom)] pt-1 shadow-[0_-4px_20px_rgb(24_24_31_/_0.06)] backdrop-blur-md lg:hidden"
+      >
+        <MobileNavLink href="/" icon={Home} label="Accueil" active={pathname === "/"} />
+        {viewer && (
+          <MobileNavLink
+            href="/notifications"
+            icon={Bell}
+            label="Notifications"
+            active={pathname === "/notifications"}
+            badge={unreadCount}
+          />
+        )}
+        {isAuthor && <MobileNavLink href="/create" icon={PenSquare} label="Publier" active={pathname === "/create"} />}
+        {viewer?.profile && (
+          <MobileNavLink
+            href={`/profile/${viewer.profile.username}`}
+            icon={Home}
+            label="Profil"
+            active={pathname === `/profile/${viewer.profile.username}`}
+          />
+        )}
+        <button
+          type="button"
+          aria-expanded={isSidebarOpen}
+          aria-label="Ouvrir le menu"
+          className={cx(
+            "focus-ring flex min-w-[64px] flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 text-muted hover:bg-surface-sunken hover:text-ink",
+            isSidebarOpen && "bg-surface-sunken text-ink"
+          )}
+          onClick={() => setIsSidebarOpen(true)}
+        >
+          <Menu size={21} strokeWidth={1.8} />
+          <span className="font-sans text-[10px] font-medium">Menu</span>
+        </button>
+      </nav>
     </>
+  );
+}
+
+function MobileNavLink({
+  href,
+  icon: Icon,
+  label,
+  active,
+  badge
+}: {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  active: boolean;
+  badge?: number;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={cx(
+        "focus-ring relative flex min-w-[64px] flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 font-sans text-[10px] font-medium",
+        active ? "bg-accent-soft text-accent" : "text-muted hover:bg-surface-sunken hover:text-ink"
+      )}
+    >
+      <Icon size={21} strokeWidth={active ? 2.1 : 1.8} />
+      {badge ? <span className="absolute right-3 top-1.5 h-2 w-2 rounded-full bg-signal ring-2 ring-paper" /> : null}
+      <span>{label}</span>
+    </Link>
   );
 }
 
