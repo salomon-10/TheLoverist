@@ -142,9 +142,9 @@ export default function Navigation({
         {viewer?.profile && (
           <MobileNavLink
             href={`/profile/${viewer.profile.username}`}
-            icon={Home}
             label="Profil"
             active={pathname === `/profile/${viewer.profile.username}`}
+            avatar={{ src: viewer.profile.avatarUrl, name: viewer.profile.displayName }}
           />
         )}
        
@@ -158,13 +158,15 @@ function MobileNavLink({
   icon: Icon,
   label,
   active,
-  badge
+  badge,
+  avatar
 }: {
   href: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
   label: string;
   active: boolean;
   badge?: number;
+  avatar?: { src: string | null; name: string };
 }) {
   return (
     <Link
@@ -175,7 +177,7 @@ function MobileNavLink({
         active ? "bg-accent-soft text-accent" : "text-muted hover:bg-surface-sunken hover:text-ink"
       )}
     >
-      <Icon size={21} strokeWidth={active ? 2.1 : 1.8} />
+      {avatar ? <UserAvatar src={avatar.src} name={avatar.name} size="sm" /> : Icon ? <Icon size={21} strokeWidth={active ? 2.1 : 1.8} /> : null}
       {badge ? <span className="absolute right-3 top-1.5 h-2 w-2 rounded-full bg-signal ring-2 ring-paper" /> : null}
       <span>{label}</span>
     </Link>
