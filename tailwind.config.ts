@@ -7,24 +7,24 @@ const config: Config = {
     extend: {
       colors: {
         // Fond de page / surfaces — plateforme claire, propre
-        paper: "#FFFFFF",
-        surface: "#F6F6F8",
-        "surface-sunken": "#EFEEF3",
+        paper: "rgb(var(--color-paper) / <alpha-value>)",
+        surface: "rgb(var(--color-surface) / <alpha-value>)",
+        "surface-sunken": "rgb(var(--color-surface-sunken) / <alpha-value>)",
         // Texte & lignes
-        ink: "#18181F",
-        muted: "#6B6A75",
-        line: "#E5E4EA",
-        "line-strong": "#D2D1D9",
+        ink: "rgb(var(--color-ink) / <alpha-value>)",
+        muted: "rgb(var(--color-muted) / <alpha-value>)",
+        line: "rgb(var(--color-line) / <alpha-value>)",
+        "line-strong": "rgb(var(--color-line-strong) / <alpha-value>)",
         // Accent unique — indigo profond, ton "plateforme professionnelle"
-        accent: "#3730A9",
-        "accent-hover": "#2D2689",
-        "accent-soft": "#EEEDFB",
+        accent: "rgb(var(--color-accent) / <alpha-value>)",
+        "accent-hover": "rgb(var(--color-accent-hover) / <alpha-value>)",
+        "accent-soft": "rgb(var(--color-accent-soft) / <alpha-value>)",
         // État "aimé" / erreur
-        signal: "#DC2626",
-        "signal-soft": "#FEF0EF",
+        signal: "rgb(var(--color-signal) / <alpha-value>)",
+        "signal-soft": "rgb(var(--color-signal-soft) / <alpha-value>)",
         // Badges de catégorie
-        tag: "#0F766E",
-        "tag-soft": "#EBF7F5"
+        tag: "rgb(var(--color-tag) / <alpha-value>)",
+        "tag-soft": "rgb(var(--color-tag-soft) / <alpha-value>)"
       },
       fontFamily: {
         display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],

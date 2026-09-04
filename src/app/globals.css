@@ -4,16 +4,52 @@
 
 html {
   color-scheme: light;
+  background: rgb(var(--color-surface));
 }
 
 body {
-  background-color: #F6F6F8;
-  color: #18181F;
+  background-color: rgb(var(--color-surface));
+  color: rgb(var(--color-ink));
+}
+
+:root {
+  --color-paper: 255 255 255;
+  --color-surface: 246 246 248;
+  --color-surface-sunken: 239 238 243;
+  --color-ink: 24 24 31;
+  --color-muted: 107 106 117;
+  --color-line: 229 228 234;
+  --color-line-strong: 210 209 217;
+  --color-accent: 55 48 169;
+  --color-accent-hover: 45 38 137;
+  --color-accent-soft: 238 237 251;
+  --color-signal: 220 38 38;
+  --color-signal-soft: 254 240 239;
+  --color-tag: 15 118 110;
+  --color-tag-soft: 235 247 245;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-paper: 29 25 30;
+  --color-surface: 20 17 22;
+  --color-surface-sunken: 42 35 43;
+  --color-ink: 250 245 240;
+  --color-muted: 184 169 177;
+  --color-line: 66 53 63;
+  --color-line-strong: 91 70 84;
+  --color-accent: 221 145 160;
+  --color-accent-hover: 237 170 181;
+  --color-accent-soft: 65 40 52;
+  --color-signal: 248 113 113;
+  --color-signal-soft: 74 30 35;
+  --color-tag: 94 234 212;
+  --color-tag-soft: 21 58 56;
 }
 
 ::selection {
-  background-color: #3730A9;
-  color: #FFFFFF;
+  background-color: rgb(var(--color-accent));
+  color: rgb(var(--color-paper));
 }
 
 * {
@@ -65,7 +101,7 @@ body {
   font-family: var(--font-serif);
   font-size: 18px;
   line-height: 1.75;
-  color: #18181F;
+  color: rgb(var(--color-ink));
 }
 .article-body p + p {
   margin-top: 1.25em;

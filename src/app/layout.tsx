@@ -4,11 +4,20 @@ import { stackServerApp } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { getUnreadCount } from "@/data/notifications";
 import Navigation from "@/components/layout/Navigation";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "The Loverist",
-  description: "Publiez. Discutez. Suivez ce qui compte."
+  description: "Publiez. Discutez. Suivez ce qui compte.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-64.png", sizes: "64x64", type: "image/png" }
+    ],
+    apple: [{ url: "/app-icon-light.png", sizes: "1024x1024", type: "image/png" }]
+  }
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -18,6 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang="fr"
+      suppressHydrationWarning
       style={
         {
           "--font-display": "'Space Grotesk', ui-sans-serif, system-ui, sans-serif",
@@ -27,6 +37,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       }
     >
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(() => { try { const stored = localStorage.getItem("the-loverist-theme"); const theme = stored === "dark" || stored === "light" ? stored : (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"); document.documentElement.classList.toggle("dark", theme === "dark"); document.documentElement.style.colorScheme = theme; } catch {} })();`
+          }}
+        />
         {/* Polices chargées par le navigateur (pas par le serveur Node) :
             évite toute dépendance réseau du serveur vers Google Fonts,
             utile en dev derrière un proxy/pare-feu qui bloque ce domaine. */}
@@ -42,7 +57,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Aller au contenu principal
         </a>
         <StackProvider app={stackServerApp}>
-          <StackTheme
+          <ThemeProvider>
+            <StackTheme
             theme={{
               light: {
                 background: "#FFFFFF",
@@ -72,7 +88,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <main id="main-content" tabIndex={-1} className="w-full pb-24 outline-none lg:pb-0">
               {children}
             </main>
-          </StackTheme>
+            </StackTheme>
+          </ThemeProvider>
         </StackProvider>
       </body>
     </html>

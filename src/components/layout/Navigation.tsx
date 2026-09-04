@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Home, Bell, Bookmark, PenSquare, FileEdit, BarChart2, MoreHorizontal, X } from "lucide-react";
+import { Home, Bell, Bookmark, PenSquare, FileEdit, BarChart2, MoreHorizontal, X, Sun, Moon } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
+import { useTheme } from "@/components/theme/ThemeProvider";
 import type { SessionUser } from "@/types";
 import { cx } from "@/lib/utils";
 
@@ -17,6 +18,7 @@ export default function Navigation({
 }) {
   const isAuthor = Boolean(viewer?.profile?.isAuthor);
   const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   useEffect(() => {
@@ -38,9 +40,10 @@ export default function Navigation({
             href="/"
             className="focus-ring flex items-center gap-2 rounded font-display text-headline-sm font-bold tracking-tight text-ink transition-platform hover:opacity-80 md:text-headline"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-accent text-white">
-              <PenSquare size={16} strokeWidth={2.25} />
-            </span>
+            <picture className="shrink-0">
+              <img src="/app-icon-light.png" alt="" className="h-8 w-8 rounded-md dark:hidden" />
+              <img src="/app-icon-dark.png" alt="" className="hidden h-8 w-8 rounded-md dark:block" />
+            </picture>
             The Loverist
           </Link>
 
@@ -76,10 +79,8 @@ export default function Navigation({
               </Link>
             )}
 
-            {viewer?.profile ? (
-              <Link href={`/profile/${viewer.profile.username}`} className="focus-ring rounded-full">
-                <UserAvatar src={viewer.profile.avatarUrl} name={viewer.profile.displayName} size="sm" />
-              </Link>
+            {viewer ? (
+              <ThemeToggle theme={theme} onToggle={toggleTheme} />
             ) : (
               <Link
                 href="/login"
@@ -237,6 +238,22 @@ function ProfileTabLink({
       <UserAvatar src={avatarSrc} name={avatarName} size="sm" />
       <span className="sr-only">Profil</span>
     </Link>
+  );
+}
+
+function ThemeToggle({ theme, onToggle }: { theme: "light" | "dark"; onToggle: () => void }) {
+  const isDark = theme === "dark";
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={isDark ? "Activer le mode clair" : "Activer le mode sombre"}
+      title={isDark ? "Mode clair" : "Mode sombre"}
+      className="focus-ring transition-platform flex h-10 w-10 items-center justify-center rounded-full text-ink hover:bg-surface-sunken"
+    >
+      {isDark ? <Sun size={19} strokeWidth={1.8} /> : <Moon size={19} strokeWidth={1.8} />}
+    </button>
   );
 }
 
