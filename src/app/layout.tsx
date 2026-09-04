@@ -7,7 +7,7 @@ import Navigation from "@/components/layout/Navigation";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Threadline",
+  title: "The Loverist",
   description: "Publiez. Discutez. Suivez ce qui compte."
 };
 

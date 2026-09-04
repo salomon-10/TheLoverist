@@ -29,7 +29,7 @@ export default function Navigation({
             <span className="flex h-8 w-8 items-center justify-center rounded-md bg-accent text-white">
               <PenSquare size={16} strokeWidth={2.25} />
             </span>
-            Threadline
+            The Loverist
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex" aria-label="Navigation principale">

@@ -1,4 +1,4 @@
-// Types métier — Threadline
+// Types métier — The Loverist
 // Ces types reflètent exactement le schéma défini dans db/schema.sql.
 
 export type PostStatus = "draft" | "published";

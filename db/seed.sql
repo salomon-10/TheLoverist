@@ -8,7 +8,7 @@ INSERT INTO profiles (id, username, display_name, avatar_url, bio, is_author) VA
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO posts (id, author_id, type, content, status, published_at) VALUES
-  ('00000000-0000-0000-0000-000000000001', 'seed_salomon', 'text', 'Premier post sur Threadline. On construit une vraie plateforme, pas une démo.', 'published', now() - interval '2 hours'),
+  ('00000000-0000-0000-0000-000000000001', 'seed_salomon', 'text', 'Premier post sur The Loverist. On construit une vraie plateforme, pas une démo.', 'published', now() - interval '2 hours'),
   ('00000000-0000-0000-0000-000000000002', 'seed_amina', 'link', 'Un bon exemple d''architecture propre en Next.js App Router.', 'published', now() - interval '5 hours')
 ON CONFLICT (id) DO NOTHING;
 

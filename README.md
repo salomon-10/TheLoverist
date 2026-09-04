@@ -1,4 +1,4 @@
-# Threadline
+# The Loverist
 
 Plateforme web de publication de contenu avec une couche sociale complète — likes, commentaires à deux niveaux, réponses, republications, abonnements, sauvegardes et notifications.
 
@@ -26,7 +26,7 @@ MVP construit selon le cahier des charges fourni : Next.js (App Router) + TypeSc
 
 ## Direction artistique
 
-Threadline suit un système éditorial clair : serif *Playfair Display* pour les titres, *Plus Jakarta Sans* pour le texte courant, fond quasi blanc, texte quasi noir, un unique accent bleu utilisé avec parcimonie (liens, focus), et un rouge réservé au seul état "aimé" pour rester lisible dans un fil social. Navigation en barre du haut pleine largeur sur desktop, barre d'onglets en bas sur mobile — pas de sidebar. Les jetons (couleurs, typographie, espacements) vivent dans `tailwind.config.ts`.
+The Loverist suit un système éditorial clair : serif *Playfair Display* pour les titres, *Plus Jakarta Sans* pour le texte courant, fond quasi blanc, texte quasi noir, un unique accent bleu utilisé avec parcimonie (liens, focus), et un rouge réservé au seul état "aimé" pour rester lisible dans un fil social. Navigation en barre du haut pleine largeur sur desktop, barre d'onglets en bas sur mobile — pas de sidebar. Les jetons (couleurs, typographie, espacements) vivent dans `tailwind.config.ts`.
 
 **Note sur les polices** : `next/font/google` télécharge les fichiers de police au build/démarrage — cela nécessite un accès réseau à `fonts.googleapis.com`. Si votre environnement local est hors-ligne, remplacez temporairement les imports `Playfair_Display`/`Plus_Jakarta_Sans` dans `src/app/layout.tsx` par une pile système (voir l'historique de ce projet pour l'exemple exact), le temps de développer sans réseau ; en production sur Vercel, le réseau est toujours disponible et les polices se chargent normalement.
 

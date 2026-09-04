@@ -1,4 +1,4 @@
--- Threadline — schema PostgreSQL (Neon)
+-- The Loverist — schema PostgreSQL (Neon)
 -- Convention : les identités utilisateur (id, email) sont gérées par Stack Auth.
 -- Cette base ne stocke jamais de mot de passe : "profiles.id" == l'id utilisateur Stack Auth.
 
