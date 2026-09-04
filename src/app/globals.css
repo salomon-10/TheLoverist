@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background-color: #F6F6F8;
+  color: #18181F;
+}
+
+::selection {
+  background-color: #3730A9;
+  color: #FFFFFF;
+}
+
+* {
+  scrollbar-color: theme("colors.line-strong") transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer utilities {
+  .focus-ring {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-paper;
+  }
+
+  .press {
+    @apply transition-transform duration-150 ease-platform active:scale-[0.97];
+  }
+
+  /* Transition par défaut pour les interactions (hover/active/état) */
+  .transition-platform {
+    transition-property: color, background-color, border-color, opacity, transform, box-shadow;
+    transition-duration: 160ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:font-sans focus:text-body-sm focus:text-paper;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Corps d'article long — lecture confortable en serif */
+.article-body {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.75;
+  color: #18181F;
+}
+.article-body p + p {
+  margin-top: 1.25em;
+}
