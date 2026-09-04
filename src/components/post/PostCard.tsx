@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Repeat2, Link as LinkIcon } from "lucide-react";
+import { Link as LinkIcon } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
 import PostActions from "@/components/post/PostActions";
 import { formatRelativeTime } from "@/lib/utils";
@@ -9,13 +9,6 @@ import type { Post } from "@/types";
 export default function PostCard({ post, isAuthenticated }: { post: Post; isAuthenticated: boolean }) {
   return (
     <article className="animate-card-in rounded-lg bg-paper p-5 shadow-card transition-platform hover:shadow-card-hover">
-      {post.repostedBy && (
-        <div className="mb-3 flex items-center gap-2 pl-14 font-sans text-body-sm font-medium text-muted">
-          <Repeat2 size={13} strokeWidth={1.75} />
-          <span>{post.repostedBy.displayName} a republié</span>
-        </div>
-      )}
-
       <div className="flex gap-4">
         <Link href={`/profile/${post.author.username}`} className="focus-ring shrink-0 rounded-full">
           <UserAvatar src={post.author.avatarUrl} name={post.author.displayName} size="md" />

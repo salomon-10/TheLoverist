@@ -85,7 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             }}
           >
             <Navigation viewer={user} unreadCount={unreadCount} />
-            <main id="main-content" tabIndex={-1} className="w-full pb-24 outline-none lg:pb-0">
+            <main id="main-content" tabIndex={-1} className="w-full pb-6 outline-none lg:pl-64 lg:pb-0">
               {children}
             </main>
             </StackTheme>

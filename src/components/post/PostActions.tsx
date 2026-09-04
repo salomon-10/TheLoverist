@@ -5,7 +5,6 @@ import { MessageCircle } from "lucide-react";
 import LikeButton from "@/components/social/LikeButton";
 import SaveButton from "@/components/social/SaveButton";
 import ShareButton from "@/components/social/ShareButton";
-import RepostButton from "@/components/social/RepostButton";
 import type { Post } from "@/types";
 
 export default function PostActions({ post, isAuthenticated }: { post: Post; isAuthenticated: boolean }) {
@@ -20,12 +19,6 @@ export default function PostActions({ post, isAuthenticated }: { post: Post; isA
           <MessageCircle size={18} strokeWidth={1.75} />
           <span className="tabular-nums">{post.commentsCount}</span>
         </Link>
-        <RepostButton
-          postId={post.id}
-          initialReposted={post.viewerHasReposted}
-          initialCount={post.repostsCount}
-          isAuthenticated={isAuthenticated}
-        />
         <LikeButton
           target="post"
           postId={post.id}
