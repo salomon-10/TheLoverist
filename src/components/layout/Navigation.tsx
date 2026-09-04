@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Home, Bell, PenSquare, FileEdit, BarChart2, Menu, X, Sun, Moon, ChevronDown } from "lucide-react";
+import { Home, Bell, PenSquare, FileEdit, BarChart2, Menu, X, Sun, Moon, ChevronDown, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { useTheme } from "@/components/theme/ThemeProvider";
@@ -259,7 +259,7 @@ function SidebarLinks({
       {viewer?.profile && (
         <SidebarLink
           href={`/profile/${viewer.profile.username}`}
-          icon={Home}
+          icon={User}
           label="Profil"
           active={pathname === `/profile/${viewer.profile.username}`}
           onNavigate={onNavigate}
