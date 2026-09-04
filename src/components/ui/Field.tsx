@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import { cx } from "@/lib/utils";
 
 const fieldStyles =
-  "focus-ring transition-platform w-full rounded-md border border-line bg-surface px-3.5 py-2.5 font-sans text-body-md text-ink placeholder:text-muted hover:border-line-strong";
+  "focus-ring transition-platform w-full rounded-md bg-surface px-3.5 py-2.5 font-sans text-body-md text-ink shadow-[inset_0_0_0_1px_rgb(24_24_31_/_0.04)] placeholder:text-muted hover:bg-surface-sunken";
 
 export const TextInput = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => <input ref={ref} className={cx(fieldStyles, className)} {...props} />

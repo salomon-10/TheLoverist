@@ -8,7 +8,7 @@ import type { Post } from "@/types";
 
 export default function PostCard({ post, isAuthenticated }: { post: Post; isAuthenticated: boolean }) {
   return (
-    <article className="animate-card-in rounded-lg border border-line bg-paper p-5 shadow-card transition-platform hover:shadow-card-hover">
+    <article className="animate-card-in rounded-lg bg-paper p-5 shadow-card transition-platform hover:shadow-card-hover">
       {post.repostedBy && (
         <div className="mb-3 flex items-center gap-2 pl-14 font-sans text-body-sm font-medium text-muted">
           <Repeat2 size={13} strokeWidth={1.75} />

@@ -33,7 +33,7 @@ body {
 
 @layer utilities {
   .focus-ring {
-    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-paper;
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-paper;
   }
 
   .press {
