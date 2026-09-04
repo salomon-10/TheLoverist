@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Home, Bell, PenSquare, FileEdit, BarChart2, Menu, X, Sun, Moon, ChevronDown, User } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
+import { BookPlus } from 'lucide-react';
 import { useTheme } from "@/components/theme/ThemeProvider";
 import type { SessionUser } from "@/types";
 import { cx } from "@/lib/utils";
@@ -133,7 +134,7 @@ export default function Navigation({
         )}
         {isAuthor && (
           <MobileNavButton
-            icon={PenSquare}
+            icon={BookPlus}
             label="Répertoires"
             active={pathname === "/create" || pathname === "/drafts"}
             onClick={() => setIsSidebarOpen(true)}
@@ -245,7 +246,7 @@ function SidebarLinks({
         <div className="pt-2">
           <SidebarLink
             href="/create"
-            icon={PenSquare}
+            icon={BookPlus}
             label="Répertoires"
             active={pathname === "/create" || pathname === "/drafts"}
             onNavigate={onNavigate}
