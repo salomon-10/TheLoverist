@@ -59,7 +59,7 @@ export default function PostComposer({ author }: { author: Profile }) {
   }
 
   return (
-    <div className="mb-4 border-b border-line pb-4">
+    <div className="border-b border-line pb-stack-sm">
       <div className={cx("flex items-center gap-2.5 sm:hidden", expanded && "hidden")}>
         <UserAvatar src={author.avatarUrl} name={author.displayName} size="sm" className="shrink-0" />
         <button
@@ -69,13 +69,7 @@ export default function PostComposer({ author }: { author: Profile }) {
         >
           Quoi de neuf ?
         </button>
-        <IconButton
-          onClick={() => {
-            setExpanded(true);
-            setShowImageField(true);
-          }}
-          aria-label="Ajouter une image"
-        >
+        <IconButton onClick={() => setExpanded(true)} aria-label="Ajouter une image">
           <ImageIcon size={19} strokeWidth={1.75} />
         </IconButton>
       </div>
@@ -94,7 +88,7 @@ export default function PostComposer({ author }: { author: Profile }) {
             rows={expanded ? 3 : 1}
             maxLength={MAX_LENGTH}
             autoFocus={expanded}
-            className="focus-ring transition-platform w-full resize-none rounded bg-transparent font-display text-headline-sm text-ink placeholder:font-sans placeholder:font-normal placeholder:text-muted"
+            className="focus-ring transition-editorial w-full resize-none rounded bg-transparent font-serif text-headline-sm text-ink placeholder:text-muted"
           />
 
           {showLinkField && (
@@ -104,7 +98,7 @@ export default function PostComposer({ author }: { author: Profile }) {
                 onChange={(e) => setLinkUrl(e.target.value)}
                 placeholder="https://…"
                 aria-label="Lien à joindre"
-                className="focus-ring transition-platform w-full rounded-md border border-line bg-surface px-3.5 py-2.5 font-sans text-body-md text-ink placeholder:text-muted"
+                className="focus-ring transition-editorial w-full rounded border border-line bg-surface-sunken px-3.5 py-2.5 font-sans text-body-md text-ink placeholder:text-muted"
               />
               <IconButton
                 onClick={() => {
@@ -125,7 +119,7 @@ export default function PostComposer({ author }: { author: Profile }) {
                 onChange={(e) => setMediaUrl(e.target.value)}
                 placeholder="URL de l'image…"
                 aria-label="URL de l'image à joindre"
-                className="focus-ring transition-platform w-full rounded-md border border-line bg-surface px-3.5 py-2.5 font-sans text-body-md text-ink placeholder:text-muted"
+                className="focus-ring transition-editorial w-full rounded border border-line bg-surface-sunken px-3.5 py-2.5 font-sans text-body-md text-ink placeholder:text-muted"
               />
               <IconButton
                 onClick={() => {
@@ -153,7 +147,6 @@ export default function PostComposer({ author }: { author: Profile }) {
                   active={showImageField}
                   aria-label="Ajouter une image"
                   aria-pressed={showImageField}
-                  className={showImageField ? "bg-accent-soft text-accent" : undefined}
                 >
                   <ImageIcon size={18} strokeWidth={1.75} />
                 </IconButton>
@@ -162,7 +155,6 @@ export default function PostComposer({ author }: { author: Profile }) {
                   active={showLinkField}
                   aria-label="Ajouter un lien"
                   aria-pressed={showLinkField}
-                  className={showLinkField ? "bg-accent-soft text-accent" : undefined}
                 >
                   <Link2 size={18} strokeWidth={1.75} />
                 </IconButton>
@@ -191,7 +183,7 @@ export default function PostComposer({ author }: { author: Profile }) {
                   Brouillon
                 </Button>
                 <Button type="button" onClick={() => submit("published")} disabled={isPending || !hasContent}>
-                  Publier
+                  {isPending ? "Publication…" : "Publier"}
                 </Button>
               </div>
             </div>
