@@ -37,14 +37,6 @@ export default function Navigation({
       {/* Barre supérieure — pleine largeur, desktop et mobile */}
       <header className="sticky top-0 z-50 bg-paper/95 shadow-header backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-canvas items-center justify-between px-margin-mobile md:h-[72px] md:px-margin-desktop">
-          <button
-            type="button"
-            aria-label="Ouvrir le menu"
-            className="focus-ring mr-2 flex h-10 w-10 items-center justify-center rounded-full text-ink hover:bg-surface lg:hidden"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            <Menu size={21} />
-          </button>
           <Link
             href="/"
             className="focus-ring flex items-center gap-2 rounded font-display text-headline-sm font-bold tracking-tight text-ink transition-platform hover:opacity-80 md:text-headline"
@@ -148,19 +140,7 @@ export default function Navigation({
             active={pathname === `/profile/${viewer.profile.username}`}
           />
         )}
-        <button
-          type="button"
-          aria-expanded={isSidebarOpen}
-          aria-label="Ouvrir le menu"
-          className={cx(
-            "focus-ring flex min-w-[64px] flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-2 text-muted hover:bg-surface-sunken hover:text-ink",
-            isSidebarOpen && "bg-surface-sunken text-ink"
-          )}
-          onClick={() => setIsSidebarOpen(true)}
-        >
-          <Menu size={21} strokeWidth={1.8} />
-          <span className="font-sans text-[10px] font-medium">Menu</span>
-        </button>
+       
       </nav>
     </>
   );
