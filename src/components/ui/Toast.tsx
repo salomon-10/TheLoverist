@@ -22,7 +22,7 @@ export default function Toast({
       role="status"
       aria-live="polite"
       className={cx(
-        "animate-toast-in absolute top-full z-10 mt-1.5 whitespace-nowrap rounded-lg border border-line bg-ink px-3 py-2 font-sans text-body-sm text-white shadow-float",
+        "animate-toast-in absolute top-full z-10 mt-1.5 whitespace-nowrap rounded-lg border border-line bg-ink px-3 py-2 font-sans text-body-sm text-paper shadow-float",
         align === "center" && "left-1/2 -translate-x-1/2",
         align === "left" && "left-0",
         align === "right" && "right-0"

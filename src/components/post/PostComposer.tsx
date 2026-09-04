@@ -59,8 +59,28 @@ export default function PostComposer({ author }: { author: Profile }) {
   }
 
   return (
-    <div className="mb-4 rounded-lg border border-line bg-paper p-5 shadow-card transition-platform focus-within:shadow-card-hover">
-      <div className="flex gap-4">
+    <div className="mb-4 border-b border-line pb-4">
+      <div className={cx("flex items-center gap-2.5 sm:hidden", expanded && "hidden")}>
+        <UserAvatar src={author.avatarUrl} name={author.displayName} size="sm" className="shrink-0" />
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="focus-ring min-w-0 flex-1 rounded px-1 text-left font-sans text-body-md text-muted"
+        >
+          Quoi de neuf ?
+        </button>
+        <IconButton
+          onClick={() => {
+            setExpanded(true);
+            setShowImageField(true);
+          }}
+          aria-label="Ajouter une image"
+        >
+          <ImageIcon size={19} strokeWidth={1.75} />
+        </IconButton>
+      </div>
+
+      <div className={cx("gap-4 sm:flex", expanded ? "flex" : "hidden sm:flex")}>
         <UserAvatar src={author.avatarUrl} name={author.displayName} size="md" className="mt-1 shrink-0" />
 
         <div className="min-w-0 flex-1">
@@ -73,6 +93,7 @@ export default function PostComposer({ author }: { author: Profile }) {
             aria-label="Contenu de la publication"
             rows={expanded ? 3 : 1}
             maxLength={MAX_LENGTH}
+            autoFocus={expanded}
             className="focus-ring transition-platform w-full resize-none rounded bg-transparent font-display text-headline-sm text-ink placeholder:font-sans placeholder:font-normal placeholder:text-muted"
           />
 
@@ -158,6 +179,9 @@ export default function PostComposer({ author }: { author: Profile }) {
               </div>
 
               <div className="flex items-center gap-2">
+                <IconButton onClick={reset} aria-label="Fermer l'éditeur" className="sm:hidden">
+                  <X size={18} />
+                </IconButton>
                 <Button
                   type="button"
                   variant="ghost"
