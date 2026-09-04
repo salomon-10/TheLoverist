@@ -58,15 +58,21 @@ export default function PostComposer({ author }: { author: Profile }) {
     formData.set("file", file);
 
     try {
-      const response = await fetch("/api/upload", { method: "POST", body: formData });
-      const result = (await response.json()) as { url?: string; message?: string };
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+        cache: "no-store"
+      });
+      const result = (await response.json().catch(() => ({}))) as { url?: string; message?: string };
       if (!response.ok || !result.url) {
         setError(result.message ?? "L'image n'a pas pu être envoyée.");
         return;
       }
       setMediaUrl(result.url);
-    } catch {
-      setError("L'envoi de l'image a échoué. Vérifiez votre connexion.");
+    } catch (uploadError) {
+      console.error("Image upload failed", uploadError);
+      setError("Impossible d'envoyer l'image. Vérifiez votre connexion puis réessayez.");
     } finally {
       setIsUploading(false);
     }
@@ -132,7 +138,7 @@ export default function PostComposer({ author }: { author: Profile }) {
       <div className={cx("gap-4 sm:flex", expanded ? "flex" : "hidden sm:flex")}>
         <UserAvatar src={author.avatarUrl} name={author.displayName} size="md" className="mt-1 shrink-0" />
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-4 py-3 shadow-card sm:px-5 sm:py-4">
           <textarea
             ref={textareaRef}
             value={content}
@@ -144,7 +150,7 @@ export default function PostComposer({ author }: { author: Profile }) {
             rows={expanded ? 3 : 1}
             maxLength={MAX_LENGTH}
             autoFocus={expanded}
-            className="focus-ring transition-editorial w-full resize-none rounded bg-transparent font-serif text-headline-sm text-ink placeholder:text-muted"
+            className="focus-ring w-full resize-none rounded bg-transparent font-serif text-headline-sm text-ink placeholder:text-muted"
           />
 
           {showLinkField && (
@@ -154,7 +160,7 @@ export default function PostComposer({ author }: { author: Profile }) {
                 onChange={(e) => setLinkUrl(e.target.value)}
                 placeholder="https://…"
                 aria-label="Lien à joindre"
-                className="focus-ring transition-editorial w-full rounded border border-line bg-surface-sunken px-3.5 py-2.5 font-sans text-body-md text-ink placeholder:text-muted"
+                className="focus-ring w-full rounded-md border border-line bg-surface-sunken px-3.5 py-2.5 font-sans text-body-md text-ink placeholder:text-muted"
               />
               <IconButton
                 onClick={() => {
@@ -171,7 +177,7 @@ export default function PostComposer({ author }: { author: Profile }) {
           {showImageField && (
             <div
               className={cx(
-                "animate-field-in mt-2 overflow-hidden rounded border border-dashed border-line-strong bg-surface-sunken",
+                "animate-field-in mt-3 overflow-hidden rounded-md border border-dashed border-line-strong bg-surface-sunken",
                 isDragging && "border-accent bg-accent-soft"
               )}
               onDragOver={(event) => {
@@ -189,7 +195,7 @@ export default function PostComposer({ author }: { author: Profile }) {
               {mediaUrl ? (
                 <div className="relative">
                   <img src={mediaUrl} alt="Aperçu de l'image à publier" className="max-h-72 w-full object-cover" />
-                  <div className="absolute right-2 top-2 flex gap-1 rounded bg-ink/70 p-1">
+                  <div className="absolute right-2 top-2 flex gap-1 rounded-md bg-ink/80 p-1 shadow-float">
                     <IconButton onClick={() => fileInputRef.current?.click()} aria-label="Remplacer l'image">
                       <Upload size={16} />
                     </IconButton>
@@ -208,7 +214,7 @@ export default function PostComposer({ author }: { author: Profile }) {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="focus-ring flex min-h-24 w-full flex-col items-center justify-center gap-2 px-4 py-5 font-sans text-body-sm text-muted"
+                  className="focus-ring flex min-h-28 w-full flex-col items-center justify-center gap-2 px-4 py-6 font-sans text-body-sm text-muted transition-colors hover:bg-accent-soft/40"
                 >
                   {isUploading ? <Loader2 size={20} className="animate-spin text-accent" /> : <Upload size={20} />}
                   <span>{isUploading ? "Envoi de l'image…" : "Choisir une image ou la déposer ici"}</span>
@@ -219,7 +225,7 @@ export default function PostComposer({ author }: { author: Profile }) {
           )}
 
           {error && (
-            <p role="alert" className="mt-2 font-sans text-body-md text-signal">
+            <p role="alert" className="mt-3 rounded-md bg-signal-soft px-3 py-2 font-sans text-body-sm text-signal">
               {error}
             </p>
           )}
