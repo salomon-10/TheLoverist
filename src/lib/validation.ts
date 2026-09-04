@@ -12,12 +12,20 @@ export const urlSchema = z
   .url("Ce lien n'est pas valide.")
   .max(2048);
 
+const mediaUrlSchema = z
+  .string()
+  .trim()
+  .max(2048)
+  .refine((value) => value === "" || value.startsWith("/uploads/") || urlSchema.safeParse(value).success, {
+    message: "Cette image n'est pas valide."
+  });
+
 export const createPostSchema = z
   .object({
     content: postContentSchema.optional().default(""),
     type: z.enum(["text", "image", "link"]),
     linkUrl: z.string().trim().url().max(2048).optional().or(z.literal("")),
-    mediaUrl: z.string().trim().url().max(2048).optional().or(z.literal("")),
+    mediaUrl: mediaUrlSchema.optional().or(z.literal("")),
     status: z.enum(["draft", "published"])
   })
   .refine((data) => data.content.length > 0 || data.mediaUrl || data.linkUrl, {

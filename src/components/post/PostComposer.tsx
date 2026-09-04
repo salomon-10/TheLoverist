@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Image as ImageIcon, Link2, X } from "lucide-react";
+import { Image as ImageIcon, Link2, Loader2, Upload, X } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
@@ -20,8 +20,11 @@ export default function PostComposer({ author }: { author: Profile }) {
   const [mediaUrl, setMediaUrl] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [isPending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   const hasContent = content.trim().length > 0 || mediaUrl.trim().length > 0 || linkUrl.trim().length > 0;
@@ -35,6 +38,52 @@ export default function PostComposer({ author }: { author: Profile }) {
     setShowLinkField(false);
     setExpanded(false);
     setError(null);
+    setIsDragging(false);
+  }
+
+  async function uploadImage(file: File) {
+    setError(null);
+    if (!file.type.startsWith("image/")) {
+      setError("Sélectionnez une image JPG, PNG, WebP ou GIF.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError("L'image ne doit pas dépasser 10 Mo.");
+      return;
+    }
+
+    setShowImageField(true);
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.set("file", file);
+
+    try {
+      const response = await fetch("/api/upload", { method: "POST", body: formData });
+      const result = (await response.json()) as { url?: string; message?: string };
+      if (!response.ok || !result.url) {
+        setError(result.message ?? "L'image n'a pas pu être envoyée.");
+        return;
+      }
+      setMediaUrl(result.url);
+    } catch {
+      setError("L'envoi de l'image a échoué. Vérifiez votre connexion.");
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (file) void uploadImage(file);
+    event.target.value = "";
+  }
+
+  function handlePaste(event: React.ClipboardEvent<HTMLTextAreaElement>) {
+    const file = Array.from(event.clipboardData.files).find((item) => item.type.startsWith("image/"));
+    if (file) {
+      event.preventDefault();
+      void uploadImage(file);
+    }
   }
 
   function submit(status: "draft" | "published") {
@@ -69,7 +118,13 @@ export default function PostComposer({ author }: { author: Profile }) {
         >
           Quoi de neuf ?
         </button>
-        <IconButton onClick={() => setExpanded(true)} aria-label="Ajouter une image">
+        <IconButton
+          onClick={() => {
+            setExpanded(true);
+            fileInputRef.current?.click();
+          }}
+          aria-label="Téléverser une image"
+        >
           <ImageIcon size={19} strokeWidth={1.75} />
         </IconButton>
       </div>
@@ -82,6 +137,7 @@ export default function PostComposer({ author }: { author: Profile }) {
             ref={textareaRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            onPaste={handlePaste}
             onFocus={() => setExpanded(true)}
             placeholder="Quoi de neuf ?"
             aria-label="Contenu de la publication"
@@ -113,23 +169,52 @@ export default function PostComposer({ author }: { author: Profile }) {
           )}
 
           {showImageField && (
-            <div className="animate-field-in mt-2 flex items-center gap-2">
-              <input
-                value={mediaUrl}
-                onChange={(e) => setMediaUrl(e.target.value)}
-                placeholder="URL de l'image…"
-                aria-label="URL de l'image à joindre"
-                className="focus-ring transition-editorial w-full rounded border border-line bg-surface-sunken px-3.5 py-2.5 font-sans text-body-md text-ink placeholder:text-muted"
-              />
-              <IconButton
-                onClick={() => {
-                  setShowImageField(false);
-                  setMediaUrl("");
-                }}
-                aria-label="Retirer l'image"
-              >
-                <X size={16} />
-              </IconButton>
+            <div
+              className={cx(
+                "animate-field-in mt-2 overflow-hidden rounded border border-dashed border-line-strong bg-surface-sunken",
+                isDragging && "border-accent bg-accent-soft"
+              )}
+              onDragOver={(event) => {
+                event.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(event) => {
+                event.preventDefault();
+                setIsDragging(false);
+                const file = event.dataTransfer.files[0];
+                if (file) void uploadImage(file);
+              }}
+            >
+              {mediaUrl ? (
+                <div className="relative">
+                  <img src={mediaUrl} alt="Aperçu de l'image à publier" className="max-h-72 w-full object-cover" />
+                  <div className="absolute right-2 top-2 flex gap-1 rounded bg-ink/70 p-1">
+                    <IconButton onClick={() => fileInputRef.current?.click()} aria-label="Remplacer l'image">
+                      <Upload size={16} />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => {
+                        setShowImageField(false);
+                        setMediaUrl("");
+                      }}
+                      aria-label="Retirer l'image"
+                    >
+                      <X size={16} />
+                    </IconButton>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="focus-ring flex min-h-24 w-full flex-col items-center justify-center gap-2 px-4 py-5 font-sans text-body-sm text-muted"
+                >
+                  {isUploading ? <Loader2 size={20} className="animate-spin text-accent" /> : <Upload size={20} />}
+                  <span>{isUploading ? "Envoi de l'image…" : "Choisir une image ou la déposer ici"}</span>
+                  <span className="text-body-xs">JPG, PNG, WebP ou GIF · 10 Mo maximum</span>
+                </button>
+              )}
             </div>
           )}
 
@@ -143,9 +228,12 @@ export default function PostComposer({ author }: { author: Profile }) {
             <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
               <div className="flex items-center gap-1">
                 <IconButton
-                  onClick={() => setShowImageField((v) => !v)}
+                  onClick={() => {
+                    setShowImageField(true);
+                    fileInputRef.current?.click();
+                  }}
                   active={showImageField}
-                  aria-label="Ajouter une image"
+                  aria-label="Téléverser une image"
                   aria-pressed={showImageField}
                 >
                   <ImageIcon size={18} strokeWidth={1.75} />
@@ -188,6 +276,15 @@ export default function PostComposer({ author }: { author: Profile }) {
               </div>
             </div>
           )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={handleFileChange}
+            className="sr-only"
+            tabIndex={-1}
+          />
         </div>
       </div>
     </div>
