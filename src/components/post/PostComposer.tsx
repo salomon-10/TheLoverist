@@ -2,19 +2,20 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import type { Editor } from "@tiptap/react";
 import { Image as ImageIcon, Link2, Loader2, Upload, X } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
+import BlockEditor from "@/components/post/editor/BlockEditor";
 import { createPostAction, saveDraftAction } from "@/actions/posts";
+import { EMPTY_DOC, isContentEmpty } from "@/lib/content";
 import { cx } from "@/lib/utils";
-import type { Profile } from "@/types";
-
-const MAX_LENGTH = 2000;
+import type { PostContent, Profile } from "@/types";
 
 export default function PostComposer({ author }: { author: Profile }) {
   const [expanded, setExpanded] = useState(false);
-  const [content, setContent] = useState("");
+  const [editor, setEditor] = useState<Editor | null>(null);
   const [showImageField, setShowImageField] = useState(false);
   const [showLinkField, setShowLinkField] = useState(false);
   const [mediaUrl, setMediaUrl] = useState("");
@@ -23,15 +24,15 @@ export default function PostComposer({ author }: { author: Profile }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const hasContent = content.trim().length > 0 || mediaUrl.trim().length > 0 || linkUrl.trim().length > 0;
-  const remaining = MAX_LENGTH - content.length;
+  const content: PostContent = editor ? (editor.getJSON() as PostContent) : EMPTY_DOC;
+  const hasContent = !isContentEmpty(content) || mediaUrl.trim().length > 0 || linkUrl.trim().length > 0;
+  const words = editor?.storage.characterCount?.words() ?? 0;
 
   function reset() {
-    setContent("");
+    editor?.commands.clearContent();
     setMediaUrl("");
     setLinkUrl("");
     setShowImageField(false);
@@ -41,7 +42,7 @@ export default function PostComposer({ author }: { author: Profile }) {
     setIsDragging(false);
   }
 
-  async function uploadImage(file: File) {
+  async function uploadCoverImage(file: File) {
     setError(null);
     if (!file.type.startsWith("image/")) {
       setError("Sélectionnez une image JPG, PNG, WebP ou GIF.");
@@ -71,7 +72,7 @@ export default function PostComposer({ author }: { author: Profile }) {
       }
       setMediaUrl(result.url);
     } catch (uploadError) {
-      console.error("Image upload failed", uploadError);
+      console.error("Cover image upload failed", uploadError);
       setError("Impossible d'envoyer l'image. Vérifiez votre connexion puis réessayez.");
     } finally {
       setIsUploading(false);
@@ -80,22 +81,14 @@ export default function PostComposer({ author }: { author: Profile }) {
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    if (file) void uploadImage(file);
+    if (file) void uploadCoverImage(file);
     event.target.value = "";
-  }
-
-  function handlePaste(event: React.ClipboardEvent<HTMLTextAreaElement>) {
-    const file = Array.from(event.clipboardData.files).find((item) => item.type.startsWith("image/"));
-    if (file) {
-      event.preventDefault();
-      void uploadImage(file);
-    }
   }
 
   function submit(status: "draft" | "published") {
     setError(null);
     const formData = new FormData();
-    formData.set("content", content);
+    formData.set("content", JSON.stringify(content));
     formData.set("linkUrl", linkUrl);
     formData.set("mediaUrl", mediaUrl);
     formData.set("status", status);
@@ -129,7 +122,7 @@ export default function PostComposer({ author }: { author: Profile }) {
             setExpanded(true);
             fileInputRef.current?.click();
           }}
-          aria-label="Téléverser une image"
+          aria-label="Téléverser une image de couverture"
         >
           <ImageIcon size={19} strokeWidth={1.75} />
         </IconButton>
@@ -139,19 +132,9 @@ export default function PostComposer({ author }: { author: Profile }) {
         <UserAvatar src={author.avatarUrl} name={author.displayName} size="md" className="mt-1 shrink-0" />
 
         <div className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-4 py-3 shadow-card sm:px-5 sm:py-4">
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onPaste={handlePaste}
-            onFocus={() => setExpanded(true)}
-            placeholder="Quoi de neuf ?"
-            aria-label="Contenu de la publication"
-            rows={expanded ? 3 : 1}
-            maxLength={MAX_LENGTH}
-            autoFocus={expanded}
-            className="focus-ring w-full resize-none rounded bg-transparent font-serif text-headline-sm text-ink placeholder:text-muted"
-          />
+          <div onFocus={() => setExpanded(true)}>
+            <BlockEditor placeholder="Quoi de neuf ? Tapez « / » pour insérer un bloc…" onEditorReady={setEditor} />
+          </div>
 
           {showLinkField && (
             <div className="animate-field-in mt-2 flex items-center gap-2">
@@ -189,14 +172,14 @@ export default function PostComposer({ author }: { author: Profile }) {
                 event.preventDefault();
                 setIsDragging(false);
                 const file = event.dataTransfer.files[0];
-                if (file) void uploadImage(file);
+                if (file) void uploadCoverImage(file);
               }}
             >
               {mediaUrl ? (
                 <div className="relative">
-                  <img src={mediaUrl} alt="Aperçu de l'image à publier" className="max-h-72 w-full object-cover" />
+                  <img src={mediaUrl} alt="Aperçu de la couverture" className="max-h-72 w-full object-cover" />
                   <div className="absolute right-2 top-2 flex gap-1 rounded-md bg-ink/80 p-1 shadow-float">
-                    <IconButton onClick={() => fileInputRef.current?.click()} aria-label="Remplacer l'image">
+                    <IconButton onClick={() => fileInputRef.current?.click()} aria-label="Remplacer la couverture">
                       <Upload size={16} />
                     </IconButton>
                     <IconButton
@@ -204,7 +187,7 @@ export default function PostComposer({ author }: { author: Profile }) {
                         setShowImageField(false);
                         setMediaUrl("");
                       }}
-                      aria-label="Retirer l'image"
+                      aria-label="Retirer la couverture"
                     >
                       <X size={16} />
                     </IconButton>
@@ -217,7 +200,7 @@ export default function PostComposer({ author }: { author: Profile }) {
                   className="focus-ring flex min-h-28 w-full flex-col items-center justify-center gap-2 px-4 py-6 font-sans text-body-sm text-muted transition-colors hover:bg-accent-soft/40"
                 >
                   {isUploading ? <Loader2 size={20} className="animate-spin text-accent" /> : <Upload size={20} />}
-                  <span>{isUploading ? "Envoi de l'image…" : "Choisir une image ou la déposer ici"}</span>
+                  <span>{isUploading ? "Envoi de l'image…" : "Choisir une image de couverture ou la déposer ici"}</span>
                   <span className="text-body-xs">JPG, PNG, WebP ou GIF · 10 Mo maximum</span>
                 </button>
               )}
@@ -239,7 +222,7 @@ export default function PostComposer({ author }: { author: Profile }) {
                     fileInputRef.current?.click();
                   }}
                   active={showImageField}
-                  aria-label="Téléverser une image"
+                  aria-label="Ajouter une image de couverture"
                   aria-pressed={showImageField}
                 >
                   <ImageIcon size={18} strokeWidth={1.75} />
@@ -252,16 +235,7 @@ export default function PostComposer({ author }: { author: Profile }) {
                 >
                   <Link2 size={18} strokeWidth={1.75} />
                 </IconButton>
-                {content.length > MAX_LENGTH - 200 && (
-                  <span
-                    className={cx(
-                      "font-sans text-body-sm tabular-nums",
-                      remaining < 0 ? "text-signal" : "text-muted"
-                    )}
-                  >
-                    {remaining}
-                  </span>
-                )}
+                {words > 0 && <span className="font-sans text-body-sm tabular-nums text-muted">{words} mots</span>}
               </div>
 
               <div className="flex items-center gap-2">

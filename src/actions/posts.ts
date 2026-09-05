@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAuthor } from "@/lib/session";
-import { createPostSchema } from "@/lib/validation";
+import { createPostSchema, parsePostContent, postContentSchema } from "@/lib/validation";
+import { isContentEmpty } from "@/lib/content";
 import * as postsData from "@/data/posts";
 import type { ActionResult } from "@/types";
 
@@ -21,7 +22,7 @@ export async function createPostAction(formData: FormData): Promise<ActionResult
   }
 
   const parsed = createPostSchema.safeParse({
-    content: formData.get("content")?.toString() ?? "",
+    content: parsePostContent(formData.get("content")),
     type: formData.get("type")?.toString() ?? "text",
     linkUrl: formData.get("linkUrl")?.toString() ?? "",
     mediaUrl: formData.get("mediaUrl")?.toString() ?? "",
@@ -57,11 +58,14 @@ export async function updatePostAction(postId: string, formData: FormData): Prom
   const owns = await postsData.isPostOwner(postId, user.id);
   if (!owns) return { ok: false, message: "Vous ne pouvez modifier que vos propres publications." };
 
-  const content = formData.get("content")?.toString().trim() ?? "";
+  const contentResult = postContentSchema.safeParse(parsePostContent(formData.get("content")));
   const linkUrl = formData.get("linkUrl")?.toString().trim() || null;
-  if (!content && !linkUrl) return { ok: false, message: "La publication ne peut pas être vide." };
+  if (!contentResult.success) return { ok: false, message: "Contenu de publication invalide." };
+  if (isContentEmpty(contentResult.data) && !linkUrl) {
+    return { ok: false, message: "La publication ne peut pas être vide." };
+  }
 
-  await postsData.updatePublishedPost(postId, user.id, { content, linkUrl });
+  await postsData.updatePublishedPost(postId, user.id, { content: contentResult.data, linkUrl });
   revalidatePath(`/post/${postId}`);
   revalidatePath("/");
   return { ok: true };
@@ -92,17 +96,18 @@ export async function saveDraftAction(formData: FormData): Promise<ActionResult<
     return { ok: false, message: "Connectez-vous en tant qu'auteur pour créer un brouillon." };
   }
 
-  const content = formData.get("content")?.toString().trim() ?? "";
+  const contentResult = postContentSchema.safeParse(parsePostContent(formData.get("content")));
   const linkUrl = formData.get("linkUrl")?.toString().trim() || null;
   const mediaUrl = formData.get("mediaUrl")?.toString().trim() || null;
-  if (!content && !linkUrl && !mediaUrl) {
+  if (!contentResult.success) return { ok: false, message: "Contenu de publication invalide." };
+  if (isContentEmpty(contentResult.data) && !linkUrl && !mediaUrl) {
     return { ok: false, message: "Un brouillon doit contenir au moins du texte, un lien ou une image." };
   }
 
   const post = await postsData.createPost({
     authorId: user.id,
     type: mediaUrl ? "image" : linkUrl ? "link" : "text",
-    content,
+    content: contentResult.data,
     linkUrl,
     mediaUrl,
     status: "draft"
@@ -120,10 +125,11 @@ export async function updateDraftAction(postId: string, formData: FormData): Pro
     return { ok: false, message: "Action réservée aux auteurs." };
   }
 
-  const content = formData.get("content")?.toString().trim() ?? "";
+  const contentResult = postContentSchema.safeParse(parsePostContent(formData.get("content")));
   const linkUrl = formData.get("linkUrl")?.toString().trim() || null;
+  if (!contentResult.success) return { ok: false, message: "Contenu de publication invalide." };
 
-  await postsData.updateDraftContent(postId, user.id, { content, linkUrl });
+  await postsData.updateDraftContent(postId, user.id, { content: contentResult.data, linkUrl });
   revalidatePath("/drafts");
   return { ok: true };
 }

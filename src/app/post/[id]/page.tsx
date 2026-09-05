@@ -18,7 +18,7 @@ export default async function PostPage({ params }: { params: { id: string } }) {
   return (
     <PageContainer>
       <PageHeader title="Publication" />
-      <PostCard post={post} isAuthenticated={Boolean(user)} />
+      <PostCard post={post} isAuthenticated={Boolean(user)} variant="detail" />
       <CommentSection postId={post.id} viewerId={user?.id ?? null} isAuthenticated={Boolean(user)} />
     </PageContainer>
   );

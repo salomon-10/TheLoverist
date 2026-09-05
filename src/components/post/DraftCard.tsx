@@ -2,14 +2,18 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import type { Editor } from "@tiptap/react";
 import { updateDraftAction, publishDraftAction, deletePostAction } from "@/actions/posts";
 import { formatRelativeTime } from "@/lib/utils";
+import { isContentEmpty } from "@/lib/content";
 import Button from "@/components/ui/Button";
-import { TextArea, TextInput } from "@/components/ui/Field";
-import type { Post } from "@/types";
+import { TextInput } from "@/components/ui/Field";
+import BlockEditor from "@/components/post/editor/BlockEditor";
+import RenderContent from "@/components/post/editor/RenderContent";
+import type { Post, PostContent } from "@/types";
 
 export default function DraftCard({ draft }: { draft: Post }) {
-  const [content, setContent] = useState(draft.content);
+  const [editor, setEditor] = useState<Editor | null>(null);
   const [linkUrl, setLinkUrl] = useState(draft.linkUrl ?? "");
   const [editing, setEditing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -17,8 +21,9 @@ export default function DraftCard({ draft }: { draft: Post }) {
   const router = useRouter();
 
   function handleSave() {
+    const content: PostContent = editor ? (editor.getJSON() as PostContent) : draft.content;
     const formData = new FormData();
-    formData.set("content", content);
+    formData.set("content", JSON.stringify(content));
     formData.set("linkUrl", linkUrl);
     startTransition(async () => {
       const result = await updateDraftAction(draft.id, formData);
@@ -55,13 +60,9 @@ export default function DraftCard({ draft }: { draft: Post }) {
 
       {editing ? (
         <div className="animate-field-in space-y-2">
-          <TextArea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={3}
-            aria-label="Contenu du brouillon"
-            autoFocus
-          />
+          <div className="rounded-md border border-line bg-surface px-3 py-2">
+            <BlockEditor initialContent={draft.content} placeholder="Contenu du brouillon…" onEditorReady={setEditor} />
+          </div>
           <TextInput
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
@@ -69,10 +70,10 @@ export default function DraftCard({ draft }: { draft: Post }) {
             aria-label="Lien du brouillon"
           />
         </div>
+      ) : isContentEmpty(draft.content) ? (
+        <p className="italic text-muted">Brouillon sans texte</p>
       ) : (
-        <p className="whitespace-pre-wrap break-words font-sans text-body-lg text-ink">
-          {draft.content || <span className="italic text-muted">Brouillon sans texte</span>}
-        </p>
+        <RenderContent content={draft.content} />
       )}
 
       {message && (

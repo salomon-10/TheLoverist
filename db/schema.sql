@@ -44,6 +44,44 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE INDEX IF NOT EXISTS idx_posts_author ON posts (author_id);
 CREATE INDEX IF NOT EXISTS idx_posts_status_published ON posts (status, published_at DESC);
 
+-- =========================================================
+-- Migration V2 : contenu structuré en blocs (éditeur riche)
+-- =========================================================
+-- posts.content passe de TEXT (texte brut) à JSONB : un document
+-- ProseMirror/Tiptap de la forme { "type": "doc", "content": [...blocs] }.
+-- Idempotent — ne s'exécute que si la colonne est encore TEXT — et convertit
+-- chaque publication existante en un document à un seul bloc paragraphe pour
+-- ne perdre aucun contenu. Comme pour les triggers plpgsql ci-dessous,
+-- appliquer via `psql -f db/schema.sql` plutôt que `npm run db:migrate`
+-- (voir README) : ce bloc contient des points-virgules internes que le
+-- découpage naïf de `db/migrate.ts` ne gère pas correctement.
+DO $$
+BEGIN
+  IF (
+    SELECT data_type FROM information_schema.columns
+    WHERE table_name = 'posts' AND column_name = 'content'
+  ) = 'text' THEN
+    ALTER TABLE posts ALTER COLUMN content DROP DEFAULT;
+    ALTER TABLE posts ALTER COLUMN content TYPE JSONB USING (
+      CASE
+        WHEN content IS NULL OR content = '' THEN '{"type":"doc","content":[]}'::jsonb
+        ELSE jsonb_build_object(
+          'type', 'doc',
+          'content', jsonb_build_array(
+            jsonb_build_object(
+              'type', 'paragraph',
+              'content', jsonb_build_array(
+                jsonb_build_object('type', 'text', 'text', content)
+              )
+            )
+          )
+        )
+      END
+    );
+    ALTER TABLE posts ALTER COLUMN content SET DEFAULT '{"type":"doc","content":[]}'::jsonb;
+  END IF;
+END $$;
+git
 -- Médias d'une publication (une image pour le MVP, table prévue pour galeries en V2)
 CREATE TABLE IF NOT EXISTS post_media (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),

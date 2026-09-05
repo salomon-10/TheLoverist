@@ -6,6 +6,7 @@ import StatCard from "@/components/dashboard/StatCard";
 import PageContainer from "@/components/layout/PageContainer";
 import PageHeader from "@/components/layout/PageHeader";
 import { formatCount } from "@/lib/utils";
+import { extractPlainText } from "@/lib/content";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -44,7 +45,7 @@ export default async function DashboardPage() {
               >
                 <span className="w-4 shrink-0 font-display text-body-md font-bold text-muted">{index + 1}</span>
                 <span className="min-w-0 flex-1 truncate font-sans text-body-md text-ink">
-                  {post.content || "(publication sans texte)"}
+                  {extractPlainText(post.content, 80) || "(publication sans texte)"}
                 </span>
                 <span className="flex shrink-0 items-center gap-1.5 font-sans text-body-sm font-medium text-muted">
                   <Heart size={13} strokeWidth={1.75} className="fill-signal text-signal" />

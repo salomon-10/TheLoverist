@@ -1,6 +1,24 @@
 import "server-only";
 import { sql } from "@/lib/db";
-import type { Post, PostMedia, Profile } from "@/types";
+import { EMPTY_DOC } from "@/lib/content";
+import type { Post, PostContent, PostMedia, Profile } from "@/types";
+
+/**
+ * La colonne `posts.content` est JSONB : le driver Neon renvoie déjà un objet
+ * JS pour la plupart des requêtes, mais on reste défensif (chaîne, null) au
+ * cas où — un contenu illisible ne doit jamais faire planter le feed.
+ */
+function parseContent(value: unknown): PostContent {
+  if (value && typeof value === "object" && "type" in (value as object)) return value as PostContent;
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value) as PostContent;
+    } catch {
+      return EMPTY_DOC;
+    }
+  }
+  return EMPTY_DOC;
+}
 
 function rowToAuthor(row: any): Profile {
   return {
@@ -20,7 +38,7 @@ function rowToPost(row: any, media: PostMedia[]): Post {
     authorId: row.author_id,
     author: rowToAuthor(row),
     type: row.type,
-    content: row.content,
+    content: parseContent(row.content),
     linkUrl: row.link_url,
     media,
     status: row.status,
@@ -152,21 +170,22 @@ export async function getSavedPosts(viewerId: string): Promise<Post[]> {
 export async function createPost(input: {
   authorId: string;
   type: "text" | "image" | "link";
-  content: string;
+  content: PostContent;
   linkUrl?: string | null;
   mediaUrl?: string | null;
   status: "draft" | "published";
 }): Promise<Post> {
+  const contentJson = JSON.stringify(input.content);
   const rows =
     input.status === "published"
       ? await sql`
           insert into posts (author_id, type, content, link_url, status, published_at)
-          values (${input.authorId}, ${input.type}, ${input.content}, ${input.linkUrl ?? null}, 'published', now())
+          values (${input.authorId}, ${input.type}, ${contentJson}::jsonb, ${input.linkUrl ?? null}, 'published', now())
           returning id
         `
       : await sql`
           insert into posts (author_id, type, content, link_url, status)
-          values (${input.authorId}, ${input.type}, ${input.content}, ${input.linkUrl ?? null}, 'draft')
+          values (${input.authorId}, ${input.type}, ${contentJson}::jsonb, ${input.linkUrl ?? null}, 'draft')
           returning id
         `;
   const postId = rows[0]!.id as string;
@@ -183,11 +202,11 @@ export async function createPost(input: {
 export async function updateDraftContent(
   postId: string,
   authorId: string,
-  input: { content: string; linkUrl?: string | null }
+  input: { content: PostContent; linkUrl?: string | null }
 ): Promise<void> {
   await sql`
     update posts
-    set content = ${input.content}, link_url = ${input.linkUrl ?? null}
+    set content = ${JSON.stringify(input.content)}::jsonb, link_url = ${input.linkUrl ?? null}
     where id = ${postId} and author_id = ${authorId} and status = 'draft'
   `;
 }
@@ -203,11 +222,11 @@ export async function publishDraft(postId: string, authorId: string): Promise<vo
 export async function updatePublishedPost(
   postId: string,
   authorId: string,
-  input: { content: string; linkUrl?: string | null }
+  input: { content: PostContent; linkUrl?: string | null }
 ): Promise<void> {
   await sql`
     update posts
-    set content = ${input.content}, link_url = ${input.linkUrl ?? null}
+    set content = ${JSON.stringify(input.content)}::jsonb, link_url = ${input.linkUrl ?? null}
     where id = ${postId} and author_id = ${authorId} and status = 'published'
   `;
 }

@@ -106,3 +106,25 @@ body {
 .article-body p + p {
   margin-top: 1.25em;
 }
+
+/* Éditeur par blocs (Tiptap) — voir src/components/post/editor/BlockEditor.tsx */
+.prose-editor > * + * {
+  margin-top: 1em;
+}
+.prose-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: rgb(var(--color-muted));
+  pointer-events: none;
+}
+.prose-editor ul,
+.prose-editor ol {
+  padding-left: 1.5em;
+}
+.prose-editor ul {
+  list-style: disc;
+}
+.prose-editor ol {
+  list-style: decimal;
+}

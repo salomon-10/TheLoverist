@@ -33,12 +33,37 @@ export interface PostMedia {
   position: number;
 }
 
+/**
+ * Contenu riche d'une publication — document par blocs (compatible avec le
+ * format JSON de Tiptap/ProseMirror, mais défini ici sans dépendre de la
+ * librairie pour garder ce fichier de types indépendant de l'éditeur).
+ * Les types de nœuds/marques réellement acceptés sont restreints côté
+ * validation — voir `postContentSchema` dans `src/lib/validation.ts`.
+ */
+export interface PostContentMark {
+  type: string;
+  attrs?: Record<string, unknown>;
+}
+
+export interface PostContentNode {
+  type: string;
+  attrs?: Record<string, unknown>;
+  text?: string;
+  marks?: PostContentMark[];
+  content?: PostContentNode[];
+}
+
+export interface PostContent {
+  type: "doc";
+  content: PostContentNode[];
+}
+
 export interface Post {
   id: string;
   authorId: string;
   author: Profile;
   type: PostType;
-  content: string;
+  content: PostContent;
   linkUrl: string | null;
   media: PostMedia[];
   status: PostStatus;
